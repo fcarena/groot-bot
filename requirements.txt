@@ -1,7 +1,7 @@
 # Add your requirements here like:
 # numpy
 # scipy>=0.9
-python-telegram-bot
+git+https://github.com/python-telegram-bot/python-telegram-bot@master
 pyyaml
 watson-developer-cloud
-
+PySocks
