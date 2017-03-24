@@ -1,3 +1,5 @@
+config.yaml
+
 # Temporary and binary files
 *~
 *.py[cod]

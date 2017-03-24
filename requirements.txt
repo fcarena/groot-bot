@@ -2,4 +2,6 @@
 # numpy
 # scipy>=0.9
 python-telegram-bot
+pyyaml
+watson-developer-cloud
 
