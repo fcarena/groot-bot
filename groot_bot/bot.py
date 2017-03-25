@@ -1,3 +1,4 @@
+import logging
 import yaml
 from telegram.ext import CommandHandler, MessageHandler, Filters, Updater
 
@@ -8,22 +9,21 @@ CONFIG = 'config.yaml'
 
 
 def add_debugger(handler):
-    def decorated_handler(bot, update):
-        print('---------------------------')
-        print('<{}> invoked ...'.format(handler.__name__))
-        print('user: ', update.message.from_user.first_name,
-              'text: ', update.message.text)
+    def _handler(bot, update):
+        logging.debug('<%s> invoked ...\nuser: %s, text: %s',
+                      handler.__name__,
+                      update.message.from_user.first_name,
+                      update.message.text)
 
         try:
             response = handler(bot, update)
         except err:
-            print('An error occurred')
-            print(err)
+            logging.exception(
+                'An error occurred while calling handler: %s', err)
 
-        print()
         return response
 
-    return decorated_handler
+    return _handler
 
 
 class GrootBot(object):
@@ -45,7 +45,7 @@ class GrootBot(object):
         self.brain = {}
 
     def __call__(self):
-        print('Awaking Groot...')
+        logging.info('Awaking Groot...')
 
         self.updater.start_polling()
         self.updater.idle()
@@ -53,7 +53,7 @@ class GrootBot(object):
     @with_session
     def listen(self, telegram, conversation):
         responses, intents, entities = conversation.send_text(telegram.input_text)
-        print('response.text:', responses)
+        logging.debug('responses: %s', responses)
         # TODO: lookup considering a context variable 'action'
         # TODO: call action
         # TODO: process response
@@ -63,7 +63,7 @@ class GrootBot(object):
     @with_session
     def start(self, telegram, conversation):
         responses, intents, entities = conversation.send_text('')
-        print('response.text:', responses)
+        logging.debug('responses: %s', responses)
         telegram.send_text(responses)
 
     @with_session
@@ -72,6 +72,10 @@ class GrootBot(object):
             'Meus criadores não me ensinaram a responder isso...')
 
 def run():
+    logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(levelname)s:%(module)s:%(funcName)s:%(lineno)d:%(message)s')
+
     with open(CONFIG) as handler:
         groot = GrootBot(yaml.load(handler.read()))
 
