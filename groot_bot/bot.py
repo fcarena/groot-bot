@@ -28,8 +28,9 @@ class GrootBot(object):
         dispatcher = self.updater.dispatcher
         [dispatcher.add_handler(handler) for handler in self.handlers]
 
-        # Robot state (considering conversation API)
+        # Robot state
         self.brain = {}
+        query = QueryService(self.config)
 
     def __call__(self):
         logging.info('Awaking Groot...')
@@ -80,8 +81,7 @@ class GrootBot(object):
 
         action = responses['context'].get('action', None)
         if action == 'query':
-            query = QueryService(self.config)
-            text = query(text)
+            text = self.query(text)
 
         return text
 

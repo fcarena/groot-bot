@@ -40,8 +40,11 @@ class ConversationSession(object):
         self.user = user
         self.started_at = datetime.now()
 
-    def send(self, **kwargs):
+    def send(self, context=None, **kwargs):
         logging.debug('kwargs: %s, workspace: %s', kwargs, self.workspace)
+
+        self.context = {**self.context, **(context or {})}
+        logging.debug('context: %s', self.context)
 
         response = self.conversation.message(
             workspace_id=self.workspace,
@@ -52,6 +55,6 @@ class ConversationSession(object):
         self.entities = self.entities + response['entities']
         logging.debug('entities: %s', self.entities)
         self.context = response['context']
-        logging.debug('context: %s', self.context)
+        logging.debug('new context: %s', self.context)
 
-        return getpaths(response, ['output.text', 'intents', 'entities'])
+        return response

@@ -3,4 +3,4 @@ class QueryService(object):
         params = config['discovery']
 
     def __call__(self, text):
-        pass
+        return text
