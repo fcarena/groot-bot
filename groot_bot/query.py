@@ -6,13 +6,13 @@ class QueryService(object):
         params = config['discovery']
 
         self.discovery = DiscoveryV1(
-            username=params['discovery']['username'],
-            password=params['discovery']['password'],
-            version=params['discovery']['version']
+            username=params['username'],
+            password=params['password'],
+            version=params['version']
         )
 
-        self.environment_id = params['discovery']['environment_id']
-        self.collection_id = params['discovery']['collection_id']
+        self.environment_id = params['environment_id']
+        self.collection_id = params['collection_id']
 
     def __call__(self, text):
         qopts = {'query': text}

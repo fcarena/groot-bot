@@ -97,7 +97,9 @@ class GrootBot(object):
 
         action = responses['context'].get('action', None)
         if action == 'query':
+            logging.info('Accessing discovery ...')
             text = self.query(text)
+            logging.debug('discovery response: %s', text)
 
         return text
 

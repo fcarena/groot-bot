@@ -18,6 +18,7 @@ def with_conversation(method):
             session.get('conversation', None) or
             ConversationSession(user, groot.config)
         )
+        groot.brain[user['id']] = {**session, 'conversation': conversation}
 
         logging.debug('conversation: %s', conversation)
 
