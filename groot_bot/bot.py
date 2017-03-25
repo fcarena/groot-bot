@@ -92,6 +92,9 @@ class GrootBot(object):
         logging.debug('responses: %s', response)
 
         texts = getpath(response, 'output.text')
+        if(len(texts) > 1 and texts[0] == ''):
+            texts = texts[1:]
+
         if texts is None:
             raise ValueError('Conversation response should not be empty')
 
