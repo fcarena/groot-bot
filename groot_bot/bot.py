@@ -79,7 +79,7 @@ class GrootBot(object):
 
     @with_conversation
     def answer(self, user, text, conversation):
-        responses = conversation.send(
+        response = conversation.send(
             text=text,
             context=dict(
                 user=getkeys(user, [
@@ -89,20 +89,25 @@ class GrootBot(object):
                 ])
             )
         )
-        logging.debug('responses: %s', responses)
+        logging.debug('responses: %s', response)
 
-        text = getpath(responses, 'output.text')
-        if text is None:
+        texts = getpath(response, 'output.text')
+        if texts is None:
             raise ValueError('Conversation response should not be empty')
 
-        action = responses['context'].get('action', None)
+        entities = response['entities']
 
-        if action == 'imp' or action == 'git':
+        target = None
+        for entity in entities:
+            if entity['entity'] == 'target':
+                target = entity['value']
+
+        if target:
             logging.info('Accessing discovery ...')
-            text = self.query(text, action)
-            logging.debug('discovery response: %s', text)
+            doubt = getpath(response, 'input.text')
+            texts.insert(1, self.query(doubt, target))
 
-        return text
+        return texts
 
     def start(self, user, _):
         logging.info('Restarting bot brain ...')
