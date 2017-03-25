@@ -96,9 +96,10 @@ class GrootBot(object):
             raise ValueError('Conversation response should not be empty')
 
         action = responses['context'].get('action', None)
-        if action == 'query':
+
+        if action == 'imp' or action == 'git':
             logging.info('Accessing discovery ...')
-            text = self.query(text)
+            text = self.query(text, action)
             logging.debug('discovery response: %s', text)
 
         return text
