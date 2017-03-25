@@ -57,7 +57,7 @@ class GrootBot(object):
         return _handler
 
     def process_responses(self, bot, chat, responses):
-        if isinstance(responses, dict):
+        if not isinstance(responses, list):
             responses = [responses]
 
         logging.debug('%d responses', len(responses))
