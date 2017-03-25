@@ -5,3 +5,4 @@ git+https://github.com/python-telegram-bot/python-telegram-bot@master
 pyyaml
 watson-developer-cloud
 PySocks
+emoji

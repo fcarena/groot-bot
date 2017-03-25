@@ -2,6 +2,8 @@ import logging
 
 from functools import wraps
 from datetime import datetime
+
+from emoji import emojize
 from watson_developer_cloud import ConversationV1
 
 from .getters import getpath, getpaths, getkeys
@@ -29,7 +31,10 @@ class TelegramSession(object):
             messages = [messages]
 
         logging.debug('messages: %s', messages)
-        return self.send([{'text': text} for text in messages])
+        return self.send([
+            {'text': emojize(text, use_aliases=True)}
+            for text in messages
+        ])
 
 
 class ConversationSession(object):
