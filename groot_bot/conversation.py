@@ -16,7 +16,7 @@ def with_conversation(method):
         session = groot.brain.get(user['id'], {})
         conversation = (
             session.get('conversation', None) or
-            ConversationSession(user, self.config)
+            ConversationSession(user, groot.config)
         )
 
         logging.debug('conversation: %s', conversation)
@@ -28,13 +28,13 @@ def with_conversation(method):
 
 class ConversationSession(object):
     def __init__(self, user, config):
-        keys = getkeys(config['watson'], ['username', 'password', 'version'])
+        keys = getkeys(config['conversation'], ['username', 'password', 'version'])
         logging.debug('keys:', keys)
         self.conversation = ConversationV1(**keys)
         logging.debug('conversation: %s', self.conversation)
         logging.debug('workspaces: %s', self.conversation.list_workspaces())
 
-        self.workspace = getpath(config, 'watson.workspace')
+        self.workspace = getpath(config, 'conversation.workspace')
         self.context = {}
         self.entities = []
         self.user = user

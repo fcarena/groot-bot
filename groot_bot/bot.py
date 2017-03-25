@@ -6,7 +6,7 @@ from functools import wraps
 from emoji import emojize
 from telegram.ext import CommandHandler, MessageHandler, Filters, Updater
 
-from .getters import getpath
+from .getters import getpath, getkeys
 from .conversation import with_conversation
 from .query import QueryService
 
@@ -21,16 +21,18 @@ class GrootBot(object):
         self.updater = Updater(token=getpath(config, 'telegram.token'))
 
         self.handlers = [
-            CommandHandler(command, add_debugger(getattr(self, command)))
+            CommandHandler(command, self.create_handler(getattr(self, command)))
             for command in self.commands
-        ] + [MessageHandler(Filters.all, add_debugger(self.listen))]
+        ] + [
+            MessageHandler(Filters.all, self.create_handler(self.answer))
+        ]
 
         dispatcher = self.updater.dispatcher
         [dispatcher.add_handler(handler) for handler in self.handlers]
 
         # Robot state
         self.brain = {}
-        query = QueryService(self.config)
+        self.query = QueryService(self.config)
 
     def __call__(self):
         logging.info('Awaking Groot...')
@@ -40,28 +42,33 @@ class GrootBot(object):
 
     def create_handler(self, callback, type='message'):
         @wraps(callback)
-        def _handler(obj, bot, update):
+        def _handler(bot, update):
             chat, user = update.extract_chat_and_user()
             logging.debug(
                 'callback <%s>, user <%s>, chat <%s>',
-                callback.__name__, user.get('username', user['id']), chat['id']
+                callback.__name__,
+                getpath(user, 'username', user['id']),
+                chat['id']
             )
             text = update.extract_message_text()
 
-            return self.proccess_responses(bot, chat, callback(obj, user, text))
+            return self.process_responses(bot, chat, callback(user, text))
 
         return _handler
 
     def process_responses(self, bot, chat, responses):
-        if isinstance(response, dict):
+        if isinstance(responses, dict):
             responses = [responses]
 
         logging.debug('%d responses', len(responses))
-        return [self.process_response(response) for response in responses]
+        return [
+            self.process_response(bot, chat, response)
+            for response in responses
+        ]
 
     def process_response(self, bot, chat, response):
         if isinstance(response, str):
-            response = dict(text=text, parse_mode='HTML')
+            response = dict(text=response, parse_mode='HTML')
 
         text = response.get('text', None)
         if text is not None:
@@ -72,7 +79,16 @@ class GrootBot(object):
 
     @with_conversation
     def answer(self, user, text, conversation):
-        responses = conversation.send(text=text, context=dict(user=user))
+        responses = conversation.send(
+            text=text,
+            context=dict(
+                user=getkeys(user, [
+                    'username',
+                    'last_name',
+                    'first_name'
+                ])
+            )
+        )
         logging.debug('responses: %s', responses)
 
         text = getpath(responses, 'output.text')
@@ -89,7 +105,7 @@ class GrootBot(object):
         logging.info('Restarting bot brain ...')
         self.brain[user['id']] = {}
 
-        return self.listen(user, '')
+        return self.answer(user, '')
 
     def help(self, user, _):
         return dict(text='Meus criadores não me ensinaram a responder isso...')
